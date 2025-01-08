@@ -1,0 +1,18 @@
+{
+  "body": [
+    {
+      "name": "Lockbit Analysis",
+      "description": "Complete Demystification of a Lockbit's Message to FBI, with lessons for cybersecurity stakeholders.",
+      "liveUrl": "https://github.com/IamdLite/lockbit-message-fbi",
+      "icon": "vuedotjs",
+      "visual": true
+    },
+    {
+      "name": "Lunar Habitat Module",
+      "description": "I used the ARCADIA methodology and Capella tool to design a conceptual model for the architecture of a lunar habitat module.",
+      "liveUrl": "https://drive.google.com/file/d/1Z_p8wL1CA54BrnXjelM4r_FPdwWIgLI-/view?usp=sharing",
+      "icon": "vuedotjs",
+      "visual": true
+    }
+  ]
+}
