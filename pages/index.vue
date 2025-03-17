@@ -99,7 +99,7 @@
           label="My Resume"
           icon="fluent-emoji:laptop"
           :is-external-url="true"
-          url="https://drive.google.com/file/d/1qW7qWegx4JrBf3kuWC5Nf3qFoLowZR9e/view?usp=sharing"
+          url="https://drive.google.com/file/d/1uaG7OOgPqH0F6uxM91eZwy4d2WLfFdl9/view?usp=drive_link"
         ></app-link-card>
         <app-link-card
           label="Tryhackme [Guru]"
