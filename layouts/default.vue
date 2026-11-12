@@ -1,34 +1,30 @@
 <script setup>
 useHead({
-  titleTemplate: "%s · Esdras Fopa",
+  titleTemplate: (title) => (title && title !== "iamdLite" ? `${title} · iamdLite` : "iamdLite — Red Teamer & Security Researcher"),
 });
 
 const route = useRoute();
 
-const serverMeta = {
+useSeoMeta({
+  title: () => route.meta.title,
+  description: () => route.meta.description,
+  ogTitle: () => `${route.meta.title ?? "iamdLite"} · iamdLite`,
+  twitterTitle: () => `${route.meta.title ?? "iamdLite"} · iamdLite`,
+  ogDescription: () => route.meta.description,
+  twitterDescription: () => route.meta.description,
+  ogUrl: () => `https://esdrasfopa.vercel.app${route.path}`,
   ogImage: "/og-image.png",
   twitterImage: "/og-image.png",
   ogType: "website",
   ogLocale: "en_US",
-  twitterCard: "summary",
-  twitterCreator: "@esdras_fopa",
-};
-
-useSeoMeta({
-  title: () => route.meta.title,
-  description: () => route.meta.description,
-  ogTitle: () => `${route.meta.title} · Esdras Fopa`,
-  twitterTitle: () => `${route.meta.title} · Esdras Fopa`,
-  ogDescription: () => route.meta.description,
-  twitterDescription: () => route.meta.description,
-  ogUrl: () => `localhost:3000/${route.path}`,
-  ...serverMeta,
+  twitterCard: "summary_large_image",
+  twitterCreator: "@iamdlite",
 });
 </script>
 
 <!-- Default Layout -->
 <template>
-  <main id="main-content">
+  <main id="main-content" class="overflow-x-clip pt-16">
     <slot />
   </main>
 </template>

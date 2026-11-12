@@ -1,25 +1,19 @@
 <script setup>
-// Dark theme attributes
-const isDark = useDark();
-const toggle = () => !isDark;
+const { isDark, toggleTheme } = useTheme();
+// The server always renders dark; Vue keeps mismatched attributes on hydration, so
+// report dark until mounted, then switch to the stored preference.
+const mounted = useMounted();
+const dark = computed(() => !mounted.value || isDark.value);
 </script>
 
-<!-- Theme Toggle -->
+<!-- Theme toggle: cyber night ⇄ daylight ops -->
 <template>
-  <label
-    class="flex h-6 w-10 p-[.125rem] items-center cursor-pointer rounded-full bg-zinc-200 dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 text-zinc-700 [&:has(:focus-visible)]:outline-none [&:has(:focus-visible)]:ring-2 [&:has(:focus-visible)]:ring-blue-500 [&:has(:focus-visible)]:ring-opacity-50 [&:has(:focus-visible)]:ring-offset-0"
-    title="Toggle Theme"
-    aria-label="Toggle Website Theme"
+  <button
+    class="grid h-9 w-9 place-items-center rounded border border-line bg-panel/60 text-dim transition hover:border-neon/60 hover:text-neon"
+    :aria-label="dark ? 'Switch to light theme' : 'Switch to dark theme'"
+    :title="dark ? 'Daylight ops' : 'Cyber night'"
+    @click="toggleTheme"
   >
-    <input type="checkbox" class="peer sr-only" v-model="isDark" />
-    <span
-      class="h-5 w-5 p-1 flex items-center justify-center rounded-full text-center bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 peer-checked:translate-x-3/4 text-xs shadow cursor-pointer"
-      @click="toggle()"
-    >
-      <Icon
-        name="heroicons:moon-20-solid"
-        class="text-zinc-500 dark:text-zinc-100"
-      />
-    </span>
-  </label>
+    <Icon :name="dark ? 'ph:sun-bold' : 'ph:moon-stars-bold'" size="18" />
+  </button>
 </template>

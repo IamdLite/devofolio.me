@@ -1,60 +1,63 @@
 <script setup>
-  definePageMeta({
-    title: "Presentations",
-    description: "Discover my speaking portfolio",
-  });
+definePageMeta({
+  title: "Talks",
+  description: "Talks, keynotes and workshops on cybersecurity, space, leadership and open science.",
+});
 
-  // Fetch all featured projects
-  const { pending, data: allPresentations } = await useLazyAsyncData(
-    "talks",
-    () =>
-      queryContent("/presentations")
-       .sort({ date: -1 }) // Sort by date in descending order
-        // .where({ title: { $ne: "More" } })
-        .find()
-  );
+const { data: talks } = await useAsyncData("talks", () => queryContent("/presentations").sort({ date: -1 }).find());
+
+const parseDate = (d) => {
+  const [y, m = 1, day = 1] = String(d).split("-").map(Number);
+  return new Date(y, m - 1, day);
+};
+const years = computed(() => [...new Set((talks.value ?? []).map((t) => parseDate(t.date).getFullYear()))].sort((a, b) => b - a));
+const year = ref("all");
+const shown = computed(() => (talks.value ?? []).filter((t) => year.value === "all" || parseDate(t.date).getFullYear() === year.value));
+const fmt = (d) => parseDate(d).toLocaleDateString("en-US", { year: "numeric", month: "short" });
 </script>
 
-<!-- Projects Page -->
 <template>
-  <article>
-    <h1 class="mb-4 text-3xl font-bold text-left"> My Presentations</h1>
-    <p class="mb-6 text-zinc-700 dark:text-zinc-300">
-      Most of the presentations below were made in less than 5 hours prior to the speaking engagement. Imagine what I can do more...
-    </p>
-    <!-- Featured Presentation -->
-    <section
-      class="grid grid-cols-1 lg:grid-cols-2 gap-x-auto gap-y-10 mb-6 w-full justify-evently"
-    >
-      <!-- <template v-if="error"> Something occurred ooooh</template> -->
-      <template v-if="pending">
-        <app-project-skeleton
-          v-for="skeletonId in generateKeys(5)"
-          :key="skeletonId"
-        />
-      </template>
-      <template v-else>
-        <app-presentation-card
-          v-for="presentation in allPresentations"
-          :key="presentation.id"
-          :cover="presentation.cover"
-          :icon="presentation.icon"
-          :presentation-title="presentation.title"
-          :presentation-community="presentation.community"
-          :presentation-date="presentation.date"
-          :presentation-url="presentation.url"
-        />
-      </template>
-    </section>
-    <!-- Link to More Projects -->
-    <!-- <nuxt-link
-      to="/projects/more"
-      class="flex items-center justify-center w-24 py-2 font-semibold no-underline duration-150 bg-blue-500 rounded-md focus-visible:global-focus text-zinc-800 group/hover-effect"
-      >More
-      <Icon
-        name="heroicons:chevron-right-20-solid"
-        class="ml-1 group-hover/hover-effect:translate-x-1"
-      />
-    </nuxt-link> -->
-  </article>
+  <div class="container-cy py-14">
+    <header class="mb-10 max-w-3xl">
+      <p class="kicker mb-3">// ./broadcast --list</p>
+      <h1 class="h-display text-4xl sm:text-5xl"><ScrambleText text="Talks & workshops" /></h1>
+      <p class="mt-4 text-lg text-dim">
+        Most of these decks were made less than five hours before I went on stage. Imagine what I can do with a week.
+      </p>
+    </header>
+
+    <div class="mb-8 flex flex-wrap gap-1">
+      <button
+        v-for="y in ['all', ...years]"
+        :key="y"
+        class="rounded px-3 py-1.5 font-mono text-xs transition"
+        :class="year === y ? 'bg-neon text-void' : 'text-dim hover:bg-panel2 hover:text-fg'"
+        :aria-pressed="year === y"
+        @click="year = y"
+      >
+        {{ y }}
+      </button>
+    </div>
+
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <a
+        v-for="(t, i) in shown"
+        :key="t._path"
+        v-reveal="(i % 3) * 80"
+        :href="t.url"
+        target="_blank"
+        rel="noopener"
+        class="hud hud-hover group flex flex-col overflow-hidden"
+      >
+        <div class="relative aspect-video overflow-hidden border-b border-line/60">
+          <img :src="t.cover" :alt="`Title slide: ${t.title}`" loading="lazy" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+          <span class="absolute left-2 top-2 rounded bg-void/80 px-2 py-0.5 font-mono text-[10px] text-neon">{{ fmt(t.date) }}</span>
+        </div>
+        <div class="flex flex-1 flex-col p-4">
+          <h2 class="font-semibold leading-snug group-hover:text-neon">{{ t.title }}</h2>
+          <p class="mt-auto pt-3 font-mono text-xs text-dim">@ {{ t.community }}</p>
+        </div>
+      </a>
+    </div>
+  </div>
 </template>

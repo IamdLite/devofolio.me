@@ -24,3 +24,5 @@ pods/service-connections
 
 .vercel
 run.sh
+.claude/
+
