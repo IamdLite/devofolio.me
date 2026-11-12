@@ -1,7 +1,7 @@
 ---
 id: kazan
 title: "My Beautiful City Kazan, Russia [RU]"
-community: "Esdras Fopa"
+community: "iamdLite"
 icon: "github"
 cover: "/content/presentations/kazan.png"
 date: "2024-5-16"
@@ -11,7 +11,7 @@ head:
     - name: robots
       content: "index, follow"
     - name: author
-      content: Esdras Fopa
+      content: iamdLite
     - property: "og:type"
       content: article
     - name: "twitter:card"

@@ -1,79 +1,54 @@
 <script setup>
-      definePageMeta({
-        title: "Blog",
-        description:
-          "Cool content to that will change your vision of space, cybersecurity and technology in general",
-      });
+definePageMeta({
+  title: "Blog",
+  description: "Writing on space, cybersecurity and technology, published on Medium.",
+});
 
-    const { pending, data: posts } = await useLazyAsyncData("all-posts", async () => {
-    const medium_feeds_url = "https://api.rss2json.com/v1/api.json?rss_url=https://medium.com/feed/@iamdlite";
-    const response = await $fetch(medium_feeds_url);
+// Plain-text teaser cut at a word boundary.
+function excerpt(html, max = 200) {
+  const text = html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  return text.length <= max ? text : `${text.slice(0, text.lastIndexOf(" ", max))}…`;
+}
 
-    return response.items.map(post => {
-      // Clean the HTML content
-      const cleanContent = post.content
-        .replace(/<figure>.*?<\/figure>/g, '')
-        .replace(/<[^>]*>/g, '')
-        .replace(/\n\s*\n/g, '\n\n')
-
-      // Extract first image from content
-      const imgMatch = post.content.match(/<img.*?src="(.*?)"/)
-      const coverImage = imgMatch ? imgMatch[1] : ''
-
-      // Transform to match Nuxt Content's expected format
-      return {
-        _id: post.guid.split('/').pop(),
-        _path: `/blog/${post.guid.split('/').pop()}`, // Add _path for routing
-        title: post.title,
-        link: post.link,
-        description: post.description.replace(/<[^>]*>/g, '').trim(),
-        tags: post.categories,
-        image: coverImage,
-        cover_image: coverImage,
-        canonical_url: post.link,
-        head: {
-          meta: [
-            { name: 'robots', content: 'index, follow' },
-            { name: 'author', content: 'Esdras Fopa(@iamdlite)' },
-            { property: 'og:type', content: 'article' },
-            { name: 'twitter:card', content: 'summary_large_image' }
-          ]
-        },
-        published: true,
-        published_on: post.pubDate.split(" ")[0],
-        body: cleanContent
-      }
-    }).sort((a, b) => new Date(b.published_on) - new Date(a.published_on));
-  });
+// Medium feed via rss2json, with local content/blog entries as a fallback if the feed is unreachable.
+const { data: posts, pending } = await useLazyAsyncData("posts", async () => {
+  try {
+    const res = await $fetch("https://api.rss2json.com/v1/api.json?rss_url=https://medium.com/feed/@iamdlite");
+    return res.items.map((post) => ({
+      id: post.guid,
+      title: post.title,
+      url: post.link,
+      tags: post.categories ?? [],
+      image: post.thumbnail || post.content.match(/<img[^>]+src="([^"]+)"/)?.[1] || "",
+      date: post.pubDate.split(" ")[0],
+      excerpt: excerpt(post.description),
+      minutes: Math.max(1, Math.round(post.content.replace(/<[^>]*>/g, " ").split(/\s+/).length / 230)),
+    }));
+  } catch {
+    const local = await queryContent("/blog").sort({ published_on: -1 }).find();
+    return local.map((p) => ({ id: p._path, title: p.title, url: p.url, tags: p.tags ?? [], image: p.image, date: p.published_on, excerpt: p.description }));
+  }
+});
 </script>
 
-<!-- Blog: Posts -->
 <template>
-  <article>
-    <h1 class="mb-4 text-3xl font-bold text-left">Blog</h1>
-    <p class="mb-6 text-zinc-700 dark:text-zinc-300">
-      I write the kind of content that you like to read on Medium, about the aspects of technology i'm most passionate about: space, cybersecurity and technology in general. Enjoy!
-    </p>
+  <div class="container-cy py-14">
+    <header class="mb-10 flex flex-wrap items-end justify-between gap-6">
+      <div class="max-w-3xl">
+        <p class="kicker mb-3">// tail -f ~/blog</p>
+        <h1 class="h-display text-4xl sm:text-5xl"><ScrambleText text="Notes from the field" /></h1>
+        <p class="mt-4 text-lg text-dim">
+          I learn by sharing what taught me, so you can learn it faster. Space, cybersecurity and tech in general, published on Medium.
+        </p>
+      </div>
+      <a href="https://iamdlite.medium.com/" target="_blank" rel="noopener" class="btn-ghost"><Icon name="simple-icons:medium" /> Follow on Medium</a>
+    </header>
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      <template v-if="pending">
-        <app-blog-skeleton
-          v-for="skeleton in generateKeys(5)"
-          :key="skeleton"
-        />
-      </template>
-      <template v-else>
-        <app-blog-card
-          v-for="post in posts"
-          :key="post._id"
-          :tags="post.tags"
-          :blog-title="post.title"
-          :title="post.title"
-          :url="post.link"
-          :pub-date="post.published_on"
-          :cover-image="post.cover_image"
-        />
-      </template>
-    </section>
-  </article>
+    <div v-if="pending || !posts?.length" class="rounded-[2rem] border border-line bg-panel p-5">
+      <div class="grid aspect-video animate-pulse place-items-center rounded-[1.4rem] bg-black font-mono text-sm text-[#00ff9c]">
+        {{ pending ? "tuning in…" : "no signal" }}
+      </div>
+    </div>
+    <TvCarousel v-else :items="posts" label="Articles" />
+  </div>
 </template>

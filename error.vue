@@ -1,46 +1,31 @@
 <script setup>
-const pageMeta = {
-  title: "Page Not Found",
-  description: "This page doesn't exist.",
-};
+const props = defineProps({ error: Object });
+const is404 = computed(() => props.error?.statusCode === 404);
 
-const serverMeta = {
-  ogImage: "/og-image.png",
-  twitterImage: "/og-image.png",
-  ogType: "website",
-  ogLocale: "en_US",
-  twitterCard: "summary",
-  twitterCreator: "@iamdlite",
-};
-
-useSeoMeta({
-  title: () => pageMeta.title,
-  description: () => pageMeta.description,
-  ogTitle: () => pageMeta.title,
-  twitterTitle: () => pageMeta.title,
-  ogDescription: () => pageMeta.description,
-  twitterDescription: () => pageMeta.description,
-  ...serverMeta,
-});
+useHead({ title: is404.value ? "404 · Signal lost" : "Error" });
 </script>
 
 <template>
-  <!-- Sidebar -->
-  <app-side-bar />
-
-  <!-- Main Content -->
-  <main id="main-content" class="main-error">
-    <app-not-found />
+  <HackerBackdrop />
+  <AppHeader />
+  <main id="main-content" class="container-cy grid min-h-[80vh] place-items-center pt-16">
+    <div class="w-full max-w-xl text-center">
+      <p class="kicker mb-4">// {{ is404 ? "connection refused" : "kernel panic" }}</p>
+      <h1 class="h-display text-7xl sm:text-8xl">
+        <span class="glitch is-glitching" :data-text="String(error?.statusCode ?? 500)">{{ error?.statusCode ?? 500 }}</span>
+      </h1>
+      <div class="hud mt-8 p-5 text-left font-mono text-sm">
+        <p><span class="text-neon">guest@iamdLite</span><span class="text-dim">:~$</span> curl {{ $route.fullPath }}</p>
+        <p class="text-hot">{{ is404 ? "404: this route does not exist (or it's very well hidden)." : error?.statusMessage || "Something broke." }}</p>
+        <p><span class="text-neon">guest@iamdLite</span><span class="text-dim">:~$</span> <span class="blink" /></p>
+      </div>
+      <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <button class="btn-neon" @click="clearError({ redirect: '/' })"><Icon name="ph:house-bold" /> Return to base</button>
+        <button class="btn-ghost" @click="clearError({ redirect: '/projects' })"><Icon name="ph:cube-bold" /> Browse projects</button>
+      </div>
+    </div>
   </main>
-
-  <!-- Mobile Navigation -->
-  <app-nav
-    class="flex ring-1 ring-inset ring-blue-500 md:hidden after:shadow-2xl"
-  />
+  <CommandPalette />
+  <TerminalOverlay />
+  <WebNav />
 </template>
-
-<style scoped>
-#main-content.main-error {
-  @apply h-full flex flex-col items-center justify-center;
-}
-</style>

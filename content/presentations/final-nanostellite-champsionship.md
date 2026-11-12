@@ -1,7 +1,7 @@
 ---
 id: final-nanosatellite-championship
 title: "Finals Gazprom Neft Case Championship [Russian]"
-community: "Esdras Fopa"
+community: "iamdLite"
 icon: "medium"
 cover: "/content/presentations/gazprom-case.png"
 date: "2023-10-22"
@@ -11,7 +11,7 @@ head:
     - name: robots
       content: "index, follow"
     - name: author
-      content: Esdras Fopa
+      content: iamdLite
     - property: "og:type"
       content: article
     - name: "twitter:card"
